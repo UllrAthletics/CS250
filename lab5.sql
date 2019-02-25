@@ -232,7 +232,7 @@ GO
 -- trigger shows when, what, and who made changes to the appointment table
 CREATE TRIGGER tr_aft_appointment
 ON dbo.Appointment
-AFTER UDATE, INSERT, DELETE
+AFTER UPDATE, INSERT, DELETE
 AS
 BEGIN
 	IF (@@rowcount = 0) RETURN; -- This will exit the trigger if no rows are updated
@@ -242,8 +242,8 @@ BEGIN
 	IF EXISTS (SELECT * FROM inserted) AND
 	   EXISTS (SELECT * FROM deleted)
 	BEGIN
-		INSERT INTO ApptAudit(Appt_ID, ApptDate, AthlID, TrainerID, SportID, FacilityID, ActionPerformed, LastUpdated, UpdateBy)
-		SELECT Appt_ID, ApptDate, AthlID, TrainerID, SportID, FacilityID, 'UPDATE' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
+		INSERT INTO ApptAudit(ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, ActionPerformed, LastUpdated, UpdatedBy)
+		SELECT ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, 'UPDATE' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
 		FROM inserted;
 	END
 
@@ -251,8 +251,8 @@ BEGIN
 	ELSE IF EXISTS (SELECT * FROM inserted) AND
 	NOT EXISTS (SELECT * FROM deleted)
 	BEGIN
-		INSERT INTO ApptAudit(Appt_ID, ApptDate, AthlID, TrainerID, SportID, FacilityID, ActionPerformed, LastUpdated, UpdateBy)
-		SELECT Appt_ID, ApptDate, AthlID, TrainerID, SportID, FacilityID, 'INSERT' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
+		INSERT INTO ApptAudit(ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, ActionPerformed, LastUpdated, UpdatedBy)
+		SELECT ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, 'INSERT' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
 		FROM inserted;
 	END
 
@@ -260,8 +260,8 @@ BEGIN
 	ELSE IF EXISTS (SELECT * FROM deleted) AND
 	NOT EXISTS (SELECT * FROM inserted) 
 	BEGIN
-		INSERT INTO ApptAudit(Appt_ID, ApptDate, AthlID, TrainerID, SportID, FacilityID, ActionPerformed, LastUpdated, UpdateBy)
-		SELECT Appt_ID, ApptDate, AthlID, TrainerID, SportID, FacilityID, 'DELETE' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
+		INSERT INTO ApptAudit(ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, ActionPerformed, LastUpdated, UpdatedBy)
+		SELECT ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, 'DELETE' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
 		FROM deleted;
 	END
 
@@ -274,7 +274,7 @@ GO
 INSERT INTO dbo.Appointment([ApptID], [ApptDate], [AthlID], [TrainerID], [SportID], [FacilityID])
 	values('AP11', '02/22/2019 09:56', 3, 5, 'S04', 'F06');
 
-UPDATE dbo.Appointment set ApptDate = '07/05/2019 10:00'
+UPDATE dbo.Appointment set ApptDate = '07/05/2019 10:30'
 	WHERE ApptID = 'AP03';
 
 DELETE dbo.Appointment

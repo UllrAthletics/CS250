@@ -53,11 +53,11 @@ go
 
 -- Appointment table
 CREATE TABLE Appointment(
-	ApptID varchar(7) not null, -- will start with 'ap' followed by indentifying numerals
+	ApptID int not null, -- will start with 'ap' followed by indentifying numerals
 	ApptDate datetime,
 	AthlID int,
 	TrainerID int,
-	SportID varchar(5),
+	SportID varchar(5)
 	FacilityID varchar(5),
 )
 go
@@ -160,29 +160,29 @@ INSERT INTO dbo.AthlFocus(SportID,SportName)
 		('S09','Hockey'),
 		('S10','Powerlifting');
 
-INSERT INTO dbo.Athlete([AthlID], [AthlFirstName], [AthlLastName], [AthlPhoneNo], [AthlAddress], [AthlCity], [AthlState], [AthlZip], [SportID])
-	values(01,'Joe','Smith','123456789','1223 River Drive','Castle Rock','CO','80104','S02'),
-		(2,'Ron','Savoy','12345987654','5482 Ditmar Lane','Castle Rock','CO','80104','S07'),
-		(3,'Johnny','Niemoth','543126789','2985 Lemur Court','Parker','CO','80123','S05'),
-		(4,'Jaime','Ziver','432185918','85 Singapore Street','Larkspur','CO','81132','S08'),
-		(5,'Nathan','Trojan','85931478','6302 Lakegulch Road','Castle Rock','CO','80104','S02'),
-		(6,'Mark','Springer','3528095301','1653 Lakeview Drive','Crystal Valley','CO','82034','S03'),
+INSERT INTO dbo.Athlete([AthlID], [AthlFirstName], [AthlLastName], [AthlPhoneNo], [AthlAddress], [AthlCity], [AthlState], [AthlZip])
+	values(01,'Joe','Smith','123456789','1223 River Drive','Castle Rock','CO','80104')
+		(2,'Ron','Savoy','12345987654','5482 Ditmar Lane','Castle Rock','CO','80104'),
+		(3,'Johnny','Niemoth','543126789','2985 Lemur Court','Parker','CO','80123'),
+		(4,'Jaime','Ziver','432185918','85 Singapore Street','Larkspur','CO','81132'),
+		(5,'Nathan','Trojan','85931478','6302 Lakegulch Road','Castle Rock','CO','80104'),
+		(6,'Mark','Springer','3528095301','1653 Lakeview Drive','Crystal Valley','CO','82034'),
 		(7,'Amy','Foust','7209534598','530 Perry Street','Littleton','CO','80034','S01'),
-		(8,'Marie','Gomez','3036887539','3285 Castleview Place','Castle Rock','CO','80108','S09'),
-		(9,'Javier','Montoya','7207659385','4280 Wrigley Circle','Lakewood','CO','80315','S10'),
-		(10,'Bordan','Griffin','8356895347','0195 Royce Avenue','Sedalia','CO','80115','S05');
+		(8,'Marie','Gomez','3036887539','3285 Castleview Place','Castle Rock','CO','80108'),
+		(9,'Javier','Montoya','7207659385','4280 Wrigley Circle','Lakewood','CO','80315'),
+		(10,'Bordan','Griffin','8356895347','0195 Royce Avenue','Sedalia','CO','80115');
 
 INSERT INTO dbo.Appointment([ApptID], [ApptDate], [AthlID], [TrainerID], [SportID], [FacilityID])
-	values('AP01','02/19/2019 09:30',2,8,'S07','F01'),
-		('AP02','02/20/2019 13:35',5,4,'S02','F01'),
-		('AP03','02/28/2019 16:00',9,9,'S10','F03'),
-		('AP04','02/28/2019 12:30',3,1,'S05','F10'),
-		('AP05','02/28/2019 16:45',6,10,'S03','F06'),
-		('AP06','03/03/2019 18:00',9,9,'S10','F03'),
-		('AP07','03/12/2019 06:30',4,4,'S08','F05'),
-		('AP08','03/15/2019 07:00',2,8,'S07','F01'),
-		('AP09','03/18/2019 09:30',7,7,'S01','F02'),
-		('AP10','04/01/2019 10:00',6,10,'S03','F06');
+	values(01,'02/19/2019 09:30',2,8,'S07','F01'),
+		(02,'02/20/2019 13:35',5,4,'S02','F01'),
+		(03,'02/28/2019 16:00',9,9,'S10','F03'),
+		(04,'02/28/2019 12:30',3,1,'S05','F10'),
+		(05,'02/28/2019 16:45',6,10,'S03','F06'),
+		(06,'03/03/2019 18:00',9,9,'S10','F03'),
+		(07,'03/12/2019 06:30',4,4,'S08','F05'),
+		(08,'03/15/2019 07:00',2,8,'S07','F01'),
+		(09,'03/18/2019 09:30',7,7,'S01','F02'),
+		(10,'04/01/2019 10:00',6,10,'S03','F06');
 
 -- Select staements
 SELECT *
@@ -212,7 +212,7 @@ GO
 
 -- audit table for trigger
 CREATE TABLE ApptAudit(
-	ApptID varchar(7) not null, -- starts with 'ap' followed by indentifying numerals
+	ApptID int not null, -- starts with 'ap' followed by indentifying numerals
 	ApptDate datetime,
 	AthlID int,
 	TrainerID int,
@@ -260,8 +260,8 @@ BEGIN
 	ELSE IF EXISTS (SELECT * FROM deleted) AND
 	NOT EXISTS (SELECT * FROM inserted) 
 	BEGIN
-		INSERT INTO ApptAudit(ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, ActionPerformed, LastUpdated, UpdatedBy)
-		SELECT ApptID, ApptDate, AthlID, TrainerID, SportID, FacilityID, 'DELETE' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
+		INSERT INTO ApptAudit(ApptID, ApptDate, AthlID, SportID, TrainerID, FacilityID, ActionPerformed, LastUpdated, UpdatedBy)
+		SELECT ApptID, ApptDate, AthlID, SportID, TrainerID, FacilityID, 'DELETE' AS ActionPerformed, GETDATE() AS LastUpdated, SYSTEM_USER AS UpdateBy
 		FROM deleted;
 	END
 
@@ -272,10 +272,10 @@ GO
 ---- TEST ----
 
 INSERT INTO dbo.Appointment([ApptID], [ApptDate], [AthlID], [TrainerID], [SportID], [FacilityID])
-	values('AP11', '02/22/2019 09:56', 3, 5, 'S04', 'F06');
+	values(11, '02/22/2019 09:56', 3, 5, 'S04', 'F06');
 
 UPDATE dbo.Appointment set ApptDate = '07/05/2019 10:30'
-	WHERE ApptID = 'AP03';
+	WHERE ApptID = 03;
 
 DELETE dbo.Appointment
 	WHERE AthlID = 2;
@@ -344,3 +344,73 @@ ORDER BY AthlID ASC
 SELECT DISTINCT *
 FROM vw_Trainer_Facility 
 ORDER BY TrainerID ASC
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Project: Final
+Additions: stored proceduere
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+-- Drop 
+IF OBJECT_ID('pr_AvailableTrainers','P') is not null
+	DROP PROCEDURE pr_AvailableTrainers;
+GO
+
+-- create procedure to check for available trainers at a given time
+CREATE PROCEDURE pr_AvailableTrainers (@time1 DATETIME, @time2 DATETIME, @desiredTime DATETIME, @workingFacility VARCHAR(5), @athlete int, @sport VARCHAR(7))
+AS
+DECLARE @returnedPreference DATETIME, 
+		@APPID VARCHAR(50),
+		@TID int,
+		@returnAthlete int,
+		@returnTrainer int;
+BEGIN
+	
+	SELECT T.TrainerID, C.AthlID, C.AthlFirstName, C.AthlLastName, A.ApptDate INTO #TEMP
+	FROM Appointment AS A
+	JOIN Trainer AS T ON T.TrainerID = A.TrainerID
+	JOIN Athlete AS C ON C.AthlID = A.AthlID
+	WHERE A.ApptDate BETWEEN @time1 AND @time2;
+
+	
+	
+	SELECT @returnedPreference = ApptDate
+	FROM #TEMP
+	WHERE ApptDate = @desiredTime;
+
+	SELECT @returnAthlete = AthlID
+	FROM dbo.Appointment
+	WHERE AthlID = @returnAthlete;
+
+	IF @returnedPreference IS NULL
+	BEGIN
+		
+		SELECT @APPID = 'AP'+CAST(max(right([ApptID],2))+1 as VARCHAR)
+		FROM dbo.Appointment;
+		
+		IF @returnathlete IS NULL
+		BEGIN
+
+			SELECT TOP 1 @TID = TrainerID
+			FROM dbo.Trainer
+			ORDER BY NEWID();
+		
+			INSERT INTO Appointment ([ApptID], [ApptDate], [AthlID], [TrainerID], [SportID], [FacilityID])
+			SELECT @APPID, @desiredTime , @athlete, @TID, @sport , @workingFacility;
+
+		END
+		
+		ELSE IF @returnAthlete IS NOT NULL
+		BEGIN
+
+			SELECT @returnTrainer = TrainerID
+			FROM dbo.Appointment
+			WHERE AthlID = @returnAthlete
+
+			INSERT INTO Appointment ([ApptID], [ApptDate], [AthlID], [TrainerID], [SportID], [FacilityID])
+			SELECT @APPID , @desiredTime, @athlete, @returnTrainer, @sport, @workingFacility;
+		END
+	END
+	RETURN;
+END
+GO

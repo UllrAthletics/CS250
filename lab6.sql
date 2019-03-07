@@ -357,7 +357,12 @@ IF OBJECT_ID('pr_AvailableTrainers','P') is not null
 GO
 
 -- create procedure to check for available trainers at a given time
-CREATE PROCEDURE pr_AvailableTrainers (@time1 DATETIME, @time2 DATETIME, @desiredTime DATETIME, @workingFacility VARCHAR(5), @athlete int, @sport VARCHAR(7))
+CREATE PROCEDURE pr_AvailableTrainers (@time1 DATETIME, 
+										@time2 DATETIME, 
+										@desiredTime DATETIME, 
+										@workingFacility VARCHAR(5), 
+										@athlete int, 
+										@sport VARCHAR(7))
 AS
 DECLARE @returnedPreference DATETIME, 
 		@APPID VARCHAR(50),
@@ -371,8 +376,6 @@ BEGIN
 	JOIN Trainer AS T ON T.TrainerID = A.TrainerID
 	JOIN Athlete AS C ON C.AthlID = A.AthlID
 	WHERE A.ApptDate BETWEEN @time1 AND @time2;
-
-	
 	
 	SELECT @returnedPreference = ApptDate
 	FROM #TEMP
@@ -405,7 +408,7 @@ BEGIN
 
 			SELECT @returnTrainer = TrainerID
 			FROM dbo.Appointment
-			WHERE AthlID = @returnAthlete
+			WHERE AthlID = @returnAthlete;
 
 			INSERT INTO Appointment ([ApptID], [ApptDate], [AthlID], [TrainerID], [SportID], [FacilityID])
 			SELECT @APPID , @desiredTime, @athlete, @returnTrainer, @sport, @workingFacility;
@@ -414,3 +417,14 @@ BEGIN
 	RETURN;
 END
 GO
+
+EXEC pr_AvailableTrainers @time1 = '02/28/2019 11:00', 
+						@time2 = '02/28/2019 18:00', 
+						@desiredTime = '02/28/2019 14:00', 
+						@workingFacility = 'F07', 
+						@athlete = 5, 
+						@sport = 'S02';
+go
+
+select *
+From Appointment
